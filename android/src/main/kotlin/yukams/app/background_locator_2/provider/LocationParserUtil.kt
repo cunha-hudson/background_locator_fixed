@@ -4,7 +4,6 @@ import android.location.Location
 import android.os.Build
 import com.google.android.gms.location.LocationResult
 import yukams.app.background_locator_2.Keys
-import java.util.HashMap
 
 class LocationParserUtil {
     companion object {
@@ -18,18 +17,18 @@ class LocationParserUtil {
                 isMocked = location.isFromMockProvider
             }
 
-            return hashMapOf(
-                    Keys.ARG_IS_MOCKED to isMocked,
-                    Keys.ARG_LATITUDE to location.latitude,
-                    Keys.ARG_LONGITUDE to location.longitude,
-                    Keys.ARG_ACCURACY to location.accuracy,
-                    Keys.ARG_ALTITUDE to location.altitude,
-                    Keys.ARG_SPEED to location.speed,
-                    Keys.ARG_SPEED_ACCURACY to speedAccuracy,
-                    Keys.ARG_HEADING to location.bearing,
-                    Keys.ARG_TIME to location.time.toDouble(),
-                    Keys.ARG_PROVIDER to location.provider,
-            )
+            return HashMap<Any, Any>().apply {
+                this[Keys.ARG_IS_MOCKED] = isMocked
+                this[Keys.ARG_LATITUDE] = location.latitude
+                this[Keys.ARG_LONGITUDE] = location.longitude
+                this[Keys.ARG_ACCURACY] = location.accuracy
+                this[Keys.ARG_ALTITUDE] = location.altitude
+                this[Keys.ARG_SPEED] = location.speed
+                this[Keys.ARG_SPEED_ACCURACY] = speedAccuracy
+                this[Keys.ARG_HEADING] = location.bearing
+                this[Keys.ARG_TIME] = location.time.toDouble()
+                this[Keys.ARG_PROVIDER] = location.provider ?: ""
+            }
         }
 
         fun getLocationMapFromLocation(location: LocationResult?): HashMap<Any, Any>? {
@@ -44,16 +43,17 @@ class LocationParserUtil {
                 isMocked = firstLocation.isFromMockProvider
             }
 
-            return hashMapOf(
-                    Keys.ARG_IS_MOCKED to isMocked,
-                    Keys.ARG_LATITUDE to firstLocation.latitude,
-                    Keys.ARG_LONGITUDE to firstLocation.longitude,
-                    Keys.ARG_ACCURACY to firstLocation.accuracy,
-                    Keys.ARG_ALTITUDE to firstLocation.altitude,
-                    Keys.ARG_SPEED to firstLocation.speed,
-                    Keys.ARG_SPEED_ACCURACY to speedAccuracy,
-                    Keys.ARG_HEADING to firstLocation.bearing,
-                    Keys.ARG_TIME to firstLocation.time.toDouble())
+            return HashMap<Any, Any>().apply {
+                this[Keys.ARG_IS_MOCKED] = isMocked
+                this[Keys.ARG_LATITUDE] = firstLocation.latitude
+                this[Keys.ARG_LONGITUDE] = firstLocation.longitude
+                this[Keys.ARG_ACCURACY] = firstLocation.accuracy
+                this[Keys.ARG_ALTITUDE] = firstLocation.altitude
+                this[Keys.ARG_SPEED] = firstLocation.speed
+                this[Keys.ARG_SPEED_ACCURACY] = speedAccuracy
+                this[Keys.ARG_HEADING] = firstLocation.bearing
+                this[Keys.ARG_TIME] = firstLocation.time.toDouble()
+            }
         }
     }
 }
