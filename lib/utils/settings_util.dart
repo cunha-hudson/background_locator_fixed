@@ -14,7 +14,8 @@ class SettingsUtil {
       void Function()? disposeCallback,
       AndroidSettings androidSettings = const AndroidSettings(),
       IOSSettings iosSettings = const IOSSettings()}) {
-    final args = _getCommonArgumentsMap(callback: callback,
+    final args = _getCommonArgumentsMap(
+        callback: callback,
         initCallback: initCallback,
         initDataCallback: initDataCallback,
         disposeCallback: disposeCallback);
@@ -32,24 +33,41 @@ class SettingsUtil {
     required void Function(LocationDto) callback,
     void Function(Map<String, dynamic>)? initCallback,
     Map<String, dynamic>? initDataCallback,
-    void Function()? disposeCallback
+    void Function()? disposeCallback,
   }) {
-    final Map<String, dynamic> args = {
-      Keys.ARG_CALLBACK:
-          PluginUtilities.getCallbackHandle(callback)!.toRawHandle(),
-    };
+    final Map<String, dynamic> args = {};
 
+    final callbackHandle = PluginUtilities.getCallbackHandle(callback);
+    if (callbackHandle != null) {
+      args[Keys.ARG_CALLBACK] = callbackHandle.toRawHandle();
+    } else {
+      throw Exception(
+        'Failed to get callback handle for location callback. '
+        'Make sure the callback is a top-level or static function with @pragma("vm:entry-point")',
+      );
+    }
+
+    // Init callback (opcional)
     if (initCallback != null) {
-      args[Keys.ARG_INIT_CALLBACK] =
-          PluginUtilities.getCallbackHandle(initCallback)!.toRawHandle();
+      final initCallbackHandle =
+          PluginUtilities.getCallbackHandle(initCallback);
+      if (initCallbackHandle != null) {
+        args[Keys.ARG_INIT_CALLBACK] = initCallbackHandle.toRawHandle();
+      }
     }
-    if (disposeCallback != null) {
-      args[Keys.ARG_DISPOSE_CALLBACK] =
-          PluginUtilities.getCallbackHandle(disposeCallback)!.toRawHandle();
-    }
-    if (initDataCallback != null ){
-      args[Keys.ARG_INIT_DATA_CALLBACK] = initDataCallback;
 
+    // Dispose callback (opcional)
+    if (disposeCallback != null) {
+      final disposeCallbackHandle =
+          PluginUtilities.getCallbackHandle(disposeCallback);
+      if (disposeCallbackHandle != null) {
+        args[Keys.ARG_DISPOSE_CALLBACK] = disposeCallbackHandle.toRawHandle();
+      }
+    }
+
+    // Init data callback (opcional)
+    if (initDataCallback != null) {
+      args[Keys.ARG_INIT_DATA_CALLBACK] = initDataCallback;
     }
 
     return args;
@@ -63,10 +81,13 @@ class SettingsUtil {
 
     if (androidSettings.androidNotificationSettings.notificationTapCallback !=
         null) {
-      args[Keys.ARG_NOTIFICATION_CALLBACK] = PluginUtilities.getCallbackHandle(
-              androidSettings
-                  .androidNotificationSettings.notificationTapCallback!)!
-          .toRawHandle();
+      final notificationCallbackHandle = PluginUtilities.getCallbackHandle(
+          androidSettings.androidNotificationSettings.notificationTapCallback!);
+
+      if (notificationCallbackHandle != null) {
+        args[Keys.ARG_NOTIFICATION_CALLBACK] =
+            notificationCallbackHandle.toRawHandle();
+      }
     }
 
     return args;
