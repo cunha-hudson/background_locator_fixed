@@ -25,8 +25,8 @@ class _MyAppState extends State<MyApp> {
   ReceivePort port = ReceivePort();
 
   String logStr = '';
-  bool isRunning;
-  LocationDto lastLocation;
+  late bool isRunning;
+  late LocationDto? lastLocation;
 
   @override
   void initState() {
@@ -58,7 +58,7 @@ class _MyAppState extends State<MyApp> {
   Future<void> updateUI(dynamic data) async {
     final log = await FileManager.readLogFile();
 
-    LocationDto locationDto = (data != null) ? LocationDto.fromJson(data) : null;
+    LocationDto? locationDto = (data != null) ? LocationDto.fromJson(data) : null;
     await _updateNotificationText(locationDto);
 
     setState(() {
@@ -69,7 +69,7 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
-  Future<void> _updateNotificationText(LocationDto data) async {
+  Future<void> _updateNotificationText(LocationDto? data) async {
     if (data == null) {
       return;
     }
