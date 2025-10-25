@@ -8,7 +8,7 @@ import 'package:background_locator_2/settings/android_settings.dart';
 import 'package:background_locator_2/settings/ios_settings.dart';
 import 'package:background_locator_2/settings/locator_settings.dart';
 import 'package:flutter/material.dart';
-import 'package:location_permissions/location_permissions.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import 'file_manager.dart';
 import 'location_callback_handler.dart';
@@ -25,7 +25,7 @@ class _MyAppState extends State<MyApp> {
   ReceivePort port = ReceivePort();
 
   String logStr = '';
-  late bool isRunning;
+  late bool isRunning = false;
   late LocationDto? lastLocation;
 
   @override
@@ -125,14 +125,12 @@ class _MyAppState extends State<MyApp> {
       ),
     );
     String msgStatus = "-";
-    if (isRunning != null) {
-      if (isRunning) {
-        msgStatus = 'Is running';
-      } else {
-        msgStatus = 'Is not running';
-      }
+    if (isRunning) {
+      msgStatus = 'Is running';
+    } else {
+      msgStatus = 'Is not running';
     }
-    final status = Text("Status: $msgStatus");
+      final status = Text("Status: $msgStatus");
 
     final log = Text(
       logStr,
@@ -180,28 +178,44 @@ class _MyAppState extends State<MyApp> {
   }
 
   Future<bool> _checkLocationPermission() async {
-    final access = await LocationPermissions().checkPermissionStatus();
-    switch (access) {
-      case PermissionStatus.unknown:
-      case PermissionStatus.denied:
-      case PermissionStatus.restricted:
-        final permission = await LocationPermissions().requestPermissions(
-          permissionLevel: LocationPermissionLevel.locationAlways,
-        );
-        if (permission == PermissionStatus.granted) {
-          return true;
-        } else {
+    // Verifica primeiro a permissão de localização.
+    var status = await Permission.location.status;
+
+    // Se a permissão não foi concedida, solicita.
+    if (status.isDenied) {
+      status = await Permission.location.request();
+      if (status.isDenied) {
+        // O usuário negou a permissão.
+        // Você pode mostrar um diálogo informando que a funcionalidade não está disponível.
+        return false;
+      }
+    }
+
+    // Se a permissão foi concedida permanentemente (sempre), está tudo certo.
+    if (status.isGranted) {
+      // Para localização em segundo plano, também precisamos da permissão 'locationAlways'.
+      var alwaysStatus = await Permission.locationAlways.status;
+      if (alwaysStatus.isDenied) {
+        alwaysStatus = await Permission.locationAlways.request();
+        if (!alwaysStatus.isGranted) {
+          // O usuário não concedeu a permissão de localização em segundo plano.
           return false;
         }
-        break;
-      case PermissionStatus.granted:
-        return true;
-        break;
-      default:
-        return false;
-        break;
+      }
+      // Se ambas as permissões foram concedidas, retorna true.
+      return alwaysStatus.isGranted;
     }
+
+    // Se a permissão foi negada permanentemente, o usuário precisa ir para as configurações do app.
+    if (status.isPermanentlyDenied) {
+      // Opcional: mostrar um diálogo para guiar o usuário até as configurações do aplicativo.
+      await openAppSettings();
+      return false;
+    }
+
+    return false;
   }
+
 
   Future<void> _startLocator() async{
     Map<String, dynamic> data = {'countInit': 1};

@@ -13,6 +13,9 @@ class AutoStopHandler extends WidgetsBindingObserver {
         break;
       case AppLifecycleState.resumed:
         break;
+      case AppLifecycleState.hidden:
+        // TODO: Handle this case.
+        break;
     }
   }
 }

@@ -5,8 +5,10 @@ import android.content.Context
 import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
+import android.os.Build
 import androidx.core.content.ContextCompat
 import android.os.Bundle
+import androidx.annotation.RequiresApi
 
 class AndroidLocationProviderClient(context: Context, override var listener: LocationUpdateListener?) : BLLocationProvider, LocationListener {
     private val client: LocationManager? =
@@ -21,10 +23,9 @@ class AndroidLocationProviderClient(context: Context, override var listener: Loc
         client?.removeUpdates(this)
     }
 
+    @RequiresApi(Build.VERSION_CODES.S)
     @SuppressLint("MissingPermission")
     override fun requestLocationUpdates(request: LocationRequestOptions) {
-        var gpsLocation: Location? = null
-        var networkLocation: Location? = null
         timeBetweenLocation = request.interval
         if (client?.isProviderEnabled(LocationManager.GPS_PROVIDER) == true) {
             client.requestLocationUpdates(LocationManager.GPS_PROVIDER,
@@ -38,8 +39,8 @@ class AndroidLocationProviderClient(context: Context, override var listener: Loc
                     request.distanceFilter,
                     this)
         }
-        gpsLocation = client?.getLastKnownLocation(LocationManager.GPS_PROVIDER)
-        networkLocation = client?.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
+        val gpsLocation = client?.getLastKnownLocation(LocationManager.GPS_PROVIDER)
+        val networkLocation = client?.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
         // return the android device last Location after start request location
         if (gpsLocation != null && networkLocation != null) {
             if (gpsLocation.time < networkLocation.time) {
@@ -54,6 +55,7 @@ class AndroidLocationProviderClient(context: Context, override var listener: Loc
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.S)
     override fun onLocationChanged(location: Location) {
         overrideLocation = false
         //whenever the expected time period is reached invalidate the last known accuracy
@@ -84,6 +86,7 @@ class AndroidLocationProviderClient(context: Context, override var listener: Loc
     override fun onProviderEnabled(provider: String) {
         // nop
     }
+    @Deprecated("Deprecated in Java")
     override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) {}
 
 }

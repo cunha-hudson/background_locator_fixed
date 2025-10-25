@@ -2,20 +2,16 @@ package yukams.app.background_locator_2.provider
 
 import android.location.Location
 import android.os.Build
+import androidx.annotation.RequiresApi
 import com.google.android.gms.location.LocationResult
 import yukams.app.background_locator_2.Keys
 
 class LocationParserUtil {
     companion object {
+        @RequiresApi(Build.VERSION_CODES.S)
         fun getLocationMapFromLocation(location: Location): HashMap<Any, Any> {
-            var speedAccuracy = 0f
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                speedAccuracy = location.speedAccuracyMetersPerSecond
-            }
-            var isMocked = false
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
-                isMocked = location.isFromMockProvider
-            }
+            val speedAccuracy: Float = location.speedAccuracyMetersPerSecond
+            val isMocked: Boolean = location.isMock
 
             return HashMap<Any, Any>().apply {
                 this[Keys.ARG_IS_MOCKED] = isMocked
@@ -31,17 +27,11 @@ class LocationParserUtil {
             }
         }
 
+        @RequiresApi(Build.VERSION_CODES.S)
         fun getLocationMapFromLocation(location: LocationResult?): HashMap<Any, Any>? {
             val firstLocation = location?.lastLocation ?: return null
-
-            var speedAccuracy = 0f
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                speedAccuracy = firstLocation.speedAccuracyMetersPerSecond
-            }
-            var isMocked = false
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
-                isMocked = firstLocation.isFromMockProvider
-            }
+            val speedAccuracy: Float = firstLocation.speedAccuracyMetersPerSecond
+            val isMocked: Boolean = firstLocation.isMock
 
             return HashMap<Any, Any>().apply {
                 this[Keys.ARG_IS_MOCKED] = isMocked
